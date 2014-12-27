@@ -15,16 +15,6 @@ static unsigned long prevTime = 0;
 static unsigned long prevDetectTime = 0;
 E_internalEggStatus eggStatus = CLOSE_START;
 
-void eggControl(bool raiseOrSet)
-{
-
-}
-
-void playSound()
-{
-
-}
-
 void setup()
 {
     currTime = millis();
