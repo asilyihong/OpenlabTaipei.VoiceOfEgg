@@ -16,7 +16,7 @@ void ledSetup(unsigned long currT, int light, int dark)
 
 void ledLoop(unsigned long currT)
 {
-    if (eggStatus != CLOSE_END)
+    if (intEggStatus != CLOSE_END)
     {
 	if (ledStatus == LOW && currT - prevLedTime > darkInterval)
 	{

@@ -3,16 +3,15 @@
 #include <Servo.h>
 
 static unsigned long prevServoTime = 0;
-int servoUpPrd = 500;
-int servoDownPrd = 1000;
-int movePeriod = 0;
+int servoUpPrd = 50;
+int servoDownPrd = 12;
 int currPosition = 1500;
 
 Servo servo;
 
 void servoSetup(unsigned long currT, int upInterval, int downInterval)
 {
-    servo.attach(SERVER_PIN);
+    servo.attach(SERVO_PIN);
     servo.writeMicroseconds(currPosition);
     servoUpPrd = (SERVO_HIGH_MS - SERVO_LOW_MS) * FRAME_MS / upInterval;
     servoDownPrd = (SERVO_HIGH_MS - SERVO_LOW_MS) * FRAME_MS / downInterval;
@@ -20,7 +19,7 @@ void servoSetup(unsigned long currT, int upInterval, int downInterval)
 
 void servoLoop(unsigned long currT)
 {
-    if (eggStatus == OPEN_START)
+    if (intEggStatus == OPEN_START)
     {
         if (SERVO_HIGH_MS - currPosition > servoUpPrd)
         {
@@ -29,11 +28,11 @@ void servoLoop(unsigned long currT)
         else
         {
             currPosition = SERVO_HIGH_MS;
-            eggStatus = OPEN_END;
+            intEggStatus = OPEN_END;
         }
         servo.writeMicroseconds(currPosition);
     }
-    else if (eggStatus == CLOSE_START)
+    else if (intEggStatus == CLOSE_START)
     {
         if (currPosition - SERVO_LOW_MS > servoDownPrd)
         {
@@ -42,7 +41,7 @@ void servoLoop(unsigned long currT)
         else
         {
             currPosition = SERVO_LOW_MS;
-            eggStatus = CLOSE_END;
+            intEggStatus = CLOSE_END;
         }
         servo.writeMicroseconds(currPosition);
     }
@@ -53,14 +52,16 @@ void servoLoop(unsigned long currT)
  */
 void servoSetStatus(unsigned long currT, int servoStat)
 {
-    if (servoStat == 0 && (eggStatus == VOICE_START || eggStatus == VOICE_END))
+    if (servoStat == 0 && (intEggStatus == VOICE_START || intEggStatus == VOICE_END))
     {
-        eggStatus = CLOSE_START;    
+        intEggStatus = CLOSE_START;    
+	extEggStatus |= STATUS;
         // TODO: emit close event.
     }
-    else if (servoSetup == 1 && (eggStatus == CLOSE_START || eggStatus == CLOSE_END))
+    else if (servoStat == 1 && (intEggStatus == CLOSE_START || intEggStatus == CLOSE_END))
     {
-        eggStatus = OPEN_START;    
+        intEggStatus = OPEN_START;    
+	extEggStatus &= ~STATUS;
         // TODO: emit open event.
     }
 }
