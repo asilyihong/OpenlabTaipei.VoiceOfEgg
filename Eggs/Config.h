@@ -8,8 +8,10 @@
 
 /* Pin define */
 #define SERVER_PIN		2
-#define ULTRASONIC_TRIGGER_PIN 12
-#define ULTRASONIC_ECHO_PIN    11
+#define SD_SDCS_PIN             4
+#define SD_CS_PIN              10
+#define ULTRASONIC_TRIGGER_PIN  5
+#define ULTRASONIC_ECHO_PIN     6
 
 /* Constant define */
 #define FPS 25
@@ -25,7 +27,7 @@
 #define CLOSE_END   5
 
 #ifdef LED_BLINK
-# define LED_PIN   13
+# define LED_PIN    7
 #endif
 
 #ifdef SERVO_ROTATE
