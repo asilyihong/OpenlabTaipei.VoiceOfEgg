@@ -29,6 +29,7 @@ void servoLoop(unsigned long currT)
         {
             currPosition = SERVO_HIGH_MS;
             intEggStatus = OPEN_END;
+            openEndTime = currT;
         }
         servo.writeMicroseconds(currPosition);
     }
@@ -44,25 +45,6 @@ void servoLoop(unsigned long currT)
             intEggStatus = CLOSE_END;
         }
         servo.writeMicroseconds(currPosition);
-    }
-}
-
-/**
- * servoStat: 0 for down, 1 for raise
- */
-void servoSetStatus(unsigned long currT, int servoStat)
-{
-    if (servoStat == 0 && (intEggStatus == VOICE_START || intEggStatus == VOICE_END))
-    {
-        intEggStatus = CLOSE_START;    
-	extEggStatus |= STATUS;
-        // TODO: emit close event.
-    }
-    else if (servoStat == 1 && (intEggStatus == CLOSE_START || intEggStatus == CLOSE_END))
-    {
-        intEggStatus = OPEN_START;    
-	extEggStatus &= ~STATUS;
-        // TODO: emit open event.
     }
 }
 

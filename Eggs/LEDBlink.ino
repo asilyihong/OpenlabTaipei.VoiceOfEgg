@@ -29,6 +29,10 @@ void ledLoop(unsigned long currT)
     }
     else
     {
+        if (ledStatus == HIGH)
+        {
+            ledSetStatus(currT, LOW);
+        }
 	prevLedTime = currT;
     }
 }

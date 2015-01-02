@@ -7,12 +7,16 @@
 #define VOICE        1
 
 /* Pin define */
-#define SERVER_PIN 2
+#define SERVER_PIN		2
+#define ULTRASONIC_TRIGGER_PIN 12
+#define ULTRASONIC_ECHO_PIN    11
 
 /* Constant define */
 #define FPS 25
 #define FRAME_MS (1000 / FPS)
 #define IDLE_INTERVAL (30 * 1000)
+#define CLOSE_DIST 30 /* cm */
+
 #define OPEN_START  0
 #define OPEN_END    1
 #define VOICE_START 2
@@ -44,6 +48,7 @@
 #endif
 
 /**
+ * ExtEggStatus
  * +-------------+-------------+
  * |Manual/Detect|  Open/Close |
  * +-------------+-------------+
@@ -52,7 +57,7 @@
  * Close : 0
  * Open  : 1
  */
-#define STATUS 0x00000001
-#define MODE   0x00000002
+#define STATUS 0x00000001 /* Open/Close */
+#define MODE   0x00000002 /* Manual/Detect */
 
 #endif // __CONFIG_H__
