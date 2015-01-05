@@ -17,7 +17,6 @@
 #define FPS 25
 #define FRAME_MS (1000 / FPS)
 #define IDLE_INTERVAL (30 * 1000)
-#define CLOSE_DIST 30 /* cm */
 
 #define OPEN_START  0
 #define OPEN_END    1
@@ -31,7 +30,7 @@
 #endif
 
 #ifdef SERVO_ROTATE
-# define SERVO_PIN 3
+# define SERVO_PIN  3
 
 /* Servo angle define */
 # define SERVO_HIGH_ANGLE  170

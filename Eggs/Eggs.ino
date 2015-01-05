@@ -14,6 +14,7 @@ static unsigned long eggRaisePeriod = 10 * 1000;
 static unsigned long voiceWaitPeriod = 1 * 1000;
 int intEggStatus = CLOSE_END;
 int extEggStatus = 0;
+int closeDist = 30;
 float cmMesc = 0, inMesc = 0;
 long microSec = 0;
 bool detectOpenEnd = false;
@@ -82,6 +83,10 @@ void setup()
                 {
                     servoDownInterval = value.toInt();
                 }
+                else if (key.equals("closeDist"))
+                {
+                    closeDist = value.toInt();
+                }
                 else if (key.equals("voiceFileName"))
                 {
                     voiceFileName = String(value);
@@ -124,7 +129,7 @@ void loop()
             // read from ultra sonic
             microSec = ultrasonic.timing();
             cmMesc = ultrasonic.convert(microSec, Ultrasonic::CM);
-            if (cmMesc < CLOSE_DIST)
+            if (cmMesc < closeDist)
             {
                 prevDetectTime = currTime;
                 switch (intEggStatus)
@@ -148,10 +153,7 @@ void loop()
         {
             extEggStatus |= MODE;
         }
-        if (((extEggStatus & MODE) == 0) && (currTime - prevDetectTime > eggRaisePeriod)) /* Auto close in detect mode */
-        {
-            setEggStatus(currTime, 0);
-        }
+        setEggStatus(currTime, 0);
 
 #ifdef LED_BLINK
         ledLoop(currTime);
@@ -174,10 +176,11 @@ void setEggStatus(unsigned long currT, int raiseOrDown)
 {
     if (intEggStatus == OPEN_END && currT - openEndTime > voiceWaitPeriod)
     {
-        intEggStatus = VOICE_START;    
+        intEggStatus = VOICE_START;
         // TODO: play sound
     }
-    else if (raiseOrDown == 0 && (intEggStatus == VOICE_START || intEggStatus == VOICE_END))
+    else if (raiseOrDown == 0 && (intEggStatus == VOICE_START || intEggStatus == VOICE_END) 
+            && (currTime - prevDetectTime > eggRaisePeriod))
     {
         intEggStatus = CLOSE_START;    
 	extEggStatus &= ~STATUS;
