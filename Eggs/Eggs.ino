@@ -53,7 +53,6 @@ void loop()
             // read from ultra sonic
             microSec = ultrasonic.timing();
             cmMesc = ultrasonic.convert(microSec, Ultrasonic::CM);
-            
             Serial.print("cmMesc: ");
             Serial.println(cmMesc);
             Serial.print("closeEndTime: ");
@@ -65,7 +64,7 @@ void loop()
             Serial.print("autoRaiseTime: ");
             Serial.println(autoRaiseTime);
             if (cmMesc < CLOSE_DIST || 
-                    (((extEggStatus & MODE) != 0) && (currTime - closeEndTime > autoRaiseTime)))
+                    (((extEggStatus & MODE) != 0) && (closeEndTime >= openEndTime) && (currTime - closeEndTime > autoRaiseTime)))
             {
                 if (cmMesc < CLOSE_DIST)
                 {
