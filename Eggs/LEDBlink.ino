@@ -7,8 +7,9 @@ int lightInterval = 1000;
 
 void ledSetup(unsigned long currT, int light, int dark)
 {
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, ledStatus);
+    pinMode(LED1_PIN, OUTPUT);
+    pinMode(LED2_PIN, OUTPUT);
+    ledSetStatus(currT, LOW);
     prevLedTime = currT;
     lightInterval = light;
     darkInterval = dark;
@@ -41,7 +42,8 @@ void ledSetStatus(unsigned long currT, int ledStat)
 {
     prevLedTime = currT;
     ledStatus = ledStat;
-    digitalWrite(LED_PIN, ledStatus);
+    digitalWrite(LED1_PIN, ledStatus);
+    digitalWrite(LED2_PIN, ledStatus);
 }
 
 #endif

@@ -1,121 +1,45 @@
+#include <DFPlayer_Mini_Mp3.h>
+#include <SoftwareSerial.h>
 #include <Ultrasonic.h>
-#include <SD.h>
 
 #include "Config.h"
 
 /* create ultrasonic instance */
 Ultrasonic ultrasonic(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN);
+SoftwareSerial cumSerial(CUM_RX, CUM_TX);
 
 static unsigned long currTime = 0;
 static unsigned long prevTime = 0;
 static unsigned long prevDetectTime = 0;
 static unsigned long openEndTime = 0;
-static unsigned long eggRaisePeriod = 10 * 1000;
-static unsigned long voiceWaitPeriod = 1 * 1000;
+static unsigned long closeEndTime = 0;
+unsigned long autoRaiseTime = IDLE_INTERVAL;
 int intEggStatus = CLOSE_END;
 int extEggStatus = 0;
-int closeDist = 30;
-float cmMesc = 0, inMesc = 0;
+float cmMesc = 0;
 long microSec = 0;
-bool detectOpenEnd = false;
-File voice;
 
 void setup()
 {
-    String key = "", value = "", voiceFileName;
-    bool getEqual = false, endOfLine;
-    char ch;
-    int ledDarkInterval = 1000;
-    int ledLightInterval = 1000;
-    int servoRaiseInterval = 1000;
-    int servoDownInterval = 1000;
-
-    currTime = millis();
-    // init SD card and read info from that.
+    cumSerial.begin(9600);
     Serial.begin(9600);
-    /* init SD card */
-    pinMode(SD_CS_PIN, OUTPUT);
-    if (!SD.begin(SD_SDCS_PIN)) {
-        Serial.println("initialization failed!");
-        return;
-    }
-    voice = SD.open("/config.ini");
-    /* file exists */
-    if (voice)
-    {
-        while (voice.available())
-        {
-            ch = voice.read();
-            if (ch == '\n')
-            {
-                getEqual = false;
-                endOfLine = true;
-            }
-            else if (ch == '=')
-            {
-                getEqual = true;
-                continue;
-            }
-
-            if (endOfLine) 
-            {
-                if (key.equals("eggRaisePeriod"))
-                {
-                    eggRaisePeriod = value.toInt();
-                }
-                else if (key.equals("voiceWaitPeriod"))
-                {
-                    voiceWaitPeriod = value.toInt();
-                }
-                else if (key.equals("ledDarkInterval"))
-                {
-                    ledDarkInterval = value.toInt();
-                }
-                else if (key.equals("ledLightInterval"))
-                {
-                    ledLightInterval = value.toInt();
-                }
-                else if (key.equals("servoRaiseInterval"))
-                {
-                    servoRaiseInterval = value.toInt();
-                }
-                else if (key.equals("servoDownInterval"))
-                {
-                    servoDownInterval = value.toInt();
-                }
-                else if (key.equals("closeDist"))
-                {
-                    closeDist = value.toInt();
-                }
-                else if (key.equals("voiceFileName"))
-                {
-                    voiceFileName = String(value);
-                }
-                endOfLine = false;
-                key = "";
-                value = "";
-                continue;
-            }
-
-            if (getEqual)
-            {
-                value = String(value + ch);
-            }
-            else
-            {
-                key = String(key + ch);
-            }
-        }
-        voice.close();
-    }
 
 #ifdef LED_BLINK
-    ledSetup(currTime, ledLightInterval, ledDarkInterval);
+    ledSetup(currTime, LED_LIGHT_INTERVAL, LED_DARK_INTERVAL);
 #endif // LED_BLINK
 #ifdef SERVO_ROTATE
-    servoSetup(currTime, servoRaiseInterval, servoDownInterval);
+    servoSetup(currTime, SERVO_RAISE_INTERVAL, SERVO_DOWN_INTERVAL);
 #endif // SERVO_ROTATE
-    // TODO: open voice file.
+    randomSeed(millis());
+
+    // init DFPlayer
+    mp3_set_serial(cumSerial);
+    mp3_single_loop(false);
+    mp3_set_reply(false);
+    mp3_set_volume(VOICE_VOLUME);
+    currTime = millis();
+    closeEndTime = currTime;
+    openEndTime = currTime;
 }
 
 void loop()
@@ -129,17 +53,33 @@ void loop()
             // read from ultra sonic
             microSec = ultrasonic.timing();
             cmMesc = ultrasonic.convert(microSec, Ultrasonic::CM);
-            if (cmMesc < closeDist)
+            
+            Serial.print("cmMesc: ");
+            Serial.println(cmMesc);
+            Serial.print("closeEndTime: ");
+            Serial.println(closeEndTime);
+            Serial.print("currTime: ");
+            Serial.println(currTime);
+            Serial.print("extEggStatus: ");
+            Serial.println(extEggStatus);
+            Serial.print("autoRaiseTime: ");
+            Serial.println(autoRaiseTime);
+            if (cmMesc < CLOSE_DIST || 
+                    (((extEggStatus & MODE) != 0) && (currTime - closeEndTime > autoRaiseTime)))
             {
+                if (cmMesc < CLOSE_DIST)
+                {
+                    extEggStatus = extEggStatus & (~MODE);
+                }
                 prevDetectTime = currTime;
                 switch (intEggStatus)
                 {
                     case OPEN_START:
                     case OPEN_END:
                     case VOICE_START:
-                        break;
                     case VOICE_END:
                     case CLOSE_START:
+                        break;
                     case CLOSE_END:
                     default:
                         setEggStatus(currTime, 1);
@@ -147,9 +87,12 @@ void loop()
                 }
             }
         }
-
+        if (((extEggStatus & MODE) != 0) && (closeEndTime >= openEndTime) && (currTime - closeEndTime > IDLE_INTERVAL))
+        {
+            autoRaiseTime = IDLE_INTERVAL + random(RANDOM_DELAY_INTERVAL);
+        }
         /* Change to manual mode */
-        if (((extEggStatus & MODE) == 0) && (currTime - prevDetectTime > IDLE_INTERVAL))
+        if ((extEggStatus & MODE) == 0 && (currTime - closeEndTime > IDLE_INTERVAL))
         {
             extEggStatus |= MODE;
         }
@@ -174,22 +117,31 @@ void loop()
  */
 void setEggStatus(unsigned long currT, int raiseOrDown)
 {
-    if (intEggStatus == OPEN_END && currT - openEndTime > voiceWaitPeriod)
+    if (intEggStatus == VOICE_START)
+    {
+        intEggStatus = VOICE_END;
+    }
+    else if (intEggStatus == OPEN_END && currT - openEndTime > VOICE_WAIT_PERIOD)
     {
         intEggStatus = VOICE_START;
         // TODO: play sound
+        mp3_play(EGG_ID);
     }
     else if (raiseOrDown == 0 && (intEggStatus == VOICE_START || intEggStatus == VOICE_END) 
-            && (currTime - prevDetectTime > eggRaisePeriod))
+            && (currTime - prevDetectTime > EGG_RAISE_PERIOD))
     {
         intEggStatus = CLOSE_START;    
 	extEggStatus &= ~STATUS;
+        autoRaiseTime = currT;
+        closeEndTime = currT;
+        mp3_stop();
         // TODO: emit close event.
     }
-    else if (raiseOrDown == 1 && (intEggStatus == CLOSE_START || intEggStatus == CLOSE_END))
+    else if (raiseOrDown == 1 && intEggStatus == CLOSE_END)
     {
         intEggStatus = OPEN_START;    
 	extEggStatus |= STATUS;
+        closeEndTime = currT;
         // TODO: emit open event.
     }
 }
