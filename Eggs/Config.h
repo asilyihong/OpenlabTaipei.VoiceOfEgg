@@ -1,76 +1,48 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#include "defs.h"
+
+typedef struct
+{
+    unsigned int eggRaisePeriod;
+    unsigned int voiceWaitPeriod;
+    unsigned int ledDarkInterval;
+    unsigned int ledLightInterval;
+    unsigned int servoRaiseInterval;
+    unsigned int servoDownInterval;
+    unsigned int idleInterval;
+    unsigned int randomDelayInterval;
+    unsigned int closeDist;
+    unsigned int voiceVolume;
+} T_VariableConfig;
+
 /* Constant define (ID dep.) */
-#define EGG_RAISE_PERIOD 20000
-#define VOICE_WAIT_PERIOD 1000
-#define LED_DARK_INTERVAL 1000
-#define LED_LIGHT_INTERVAL 2000
-#define SERVO_RAISE_INTERVAL 500
-#define SERVO_DOWN_INTERVAL 4000
-#define CLOSE_DIST 30
-#define IDLE_INTERVAL 30000
-#define RANDOM_DELAY_INTERVAL 10000
 #define EGG_ID 5
-#define VOICE_VOLUME 30
 
-/* feature */
-#define LED_BLINK    1
-#define SERVO_ROTATE 0
-#define VOICE        1
+T_VariableConfig conf[] = {
+    /* eggRaise,    wait,    dark,   light, servoRaise, servoDown,    idle,   delay,    dist, volume */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  1 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  2 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  3 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  4 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  5 */
 
-/* Pin define */
-#define ULTRASONIC_TRIGGER_PIN  5
-#define ULTRASONIC_ECHO_PIN     6
-#define CUM_RX                  8
-#define CUM_TX                  9
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  6 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  7 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  8 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /*  9 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 10 */
 
-/* Constant define (ID indep.) */
-#define FPS 25
-#define FRAME_MS (1000 / FPS)
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 11 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 12 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 13 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 14 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 15 */
 
-#define OPEN_START  0
-#define OPEN_END    1
-#define VOICE_START 2
-#define VOICE_END   3
-#define CLOSE_START 4
-#define CLOSE_END   5
-
-#ifdef LED_BLINK
-# define LED1_PIN    10
-# define LED2_PIN    11
-#endif
-
-#ifdef SERVO_ROTATE
-# define SERVO_PIN  3
-
-/* Servo angle define */
-# define SERVO_HIGH_ANGLE  160
-# define SERVO_LOW_ANGLE    20
-
-# define SERVO_HIGH_MS  (750 + ((long)SERVO_HIGH_ANGLE * 1500 / 180))
-# define SERVO_LOW_MS   (750 + ((long)SERVO_LOW_ANGLE * 1500 / 180))
-#endif
-
-#ifdef VOICE
-# define SPEAKER_PIN 
-#endif
-
-#ifdef LED_BLINK
-# define BLINK_INTERVAL 500 /* milliseconds */
-#endif
-
-/**
- * ExtEggStatus
- * +-------------+-------------+
- * |Manual/Detect|  Open/Close |
- * +-------------+-------------+
- * Detect: 0
- * Manual: 1
- * Close : 0
- * Open  : 1
- */
-#define STATUS 0x00000001 /* Open/Close */
-#define MODE   0x00000002 /* Manual/Detect */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 16 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}, /* 17 */
+    {     20000,    1000,    1000,    2000,        500,      4000,   30000,   10000,      30,     30}  /* 18 */
+};
 
 #endif // __CONFIG_H__

@@ -13,7 +13,7 @@ static unsigned long prevTime = 0;
 static unsigned long prevDetectTime = 0;
 static unsigned long openEndTime = 0;
 static unsigned long closeEndTime = 0;
-unsigned long autoRaiseTime = IDLE_INTERVAL;
+unsigned long autoRaiseTime = conf[EGG_ID - 1].idleInterval;
 int intEggStatus = CLOSE_END;
 int extEggStatus = 0;
 float cmMesc = 0;
@@ -25,10 +25,10 @@ void setup()
     Serial.begin(9600);
 
 #ifdef LED_BLINK
-    ledSetup(currTime, LED_LIGHT_INTERVAL, LED_DARK_INTERVAL);
+    ledSetup(currTime, conf[EGG_ID - 1].ledLightInterval, conf[EGG_ID - 1].ledDarkInterval);
 #endif // LED_BLINK
 #ifdef SERVO_ROTATE
-    servoSetup(currTime, SERVO_RAISE_INTERVAL, SERVO_DOWN_INTERVAL);
+    servoSetup(currTime, conf[EGG_ID - 1].servoRaiseInterval, conf[EGG_ID - 1].servoDownInterval);
 #endif // SERVO_ROTATE
     randomSeed(millis());
 
@@ -36,7 +36,7 @@ void setup()
     mp3_set_serial(cumSerial);
     mp3_single_loop(false);
     mp3_set_reply(false);
-    mp3_set_volume(VOICE_VOLUME);
+    mp3_set_volume(conf[EGG_ID - 1].voiceVolume);
     currTime = millis();
     closeEndTime = currTime;
     openEndTime = currTime;
@@ -63,10 +63,10 @@ void loop()
             Serial.println(extEggStatus);
             Serial.print("autoRaiseTime: ");
             Serial.println(autoRaiseTime);
-            if (cmMesc < CLOSE_DIST || 
+            if (cmMesc < conf[EGG_ID - 1].closeDist || 
                     (((extEggStatus & MODE) != 0) && (closeEndTime >= openEndTime) && (currTime - closeEndTime > autoRaiseTime)))
             {
-                if (cmMesc < CLOSE_DIST)
+                if (cmMesc < conf[EGG_ID - 1].closeDist)
                 {
                     extEggStatus = extEggStatus & (~MODE);
                 }
@@ -86,12 +86,12 @@ void loop()
                 }
             }
         }
-        if (((extEggStatus & MODE) != 0) && (closeEndTime >= openEndTime) && (currTime - closeEndTime > IDLE_INTERVAL))
+        if (((extEggStatus & MODE) != 0) && (closeEndTime >= openEndTime) && (currTime - closeEndTime > conf[EGG_ID - 1].idleInterval))
         {
-            autoRaiseTime = IDLE_INTERVAL + random(RANDOM_DELAY_INTERVAL);
+            autoRaiseTime = conf[EGG_ID - 1].idleInterval + random(conf[EGG_ID - 1].randomDelayInterval);
         }
         /* Change to manual mode */
-        if ((extEggStatus & MODE) == 0 && (currTime - closeEndTime > IDLE_INTERVAL))
+        if ((extEggStatus & MODE) == 0 && (currTime - closeEndTime > conf[EGG_ID - 1].idleInterval))
         {
             extEggStatus |= MODE;
         }
@@ -120,14 +120,14 @@ void setEggStatus(unsigned long currT, int raiseOrDown)
     {
         intEggStatus = VOICE_END;
     }
-    else if (intEggStatus == OPEN_END && currT - openEndTime > VOICE_WAIT_PERIOD)
+    else if (intEggStatus == OPEN_END && currT - openEndTime > conf[EGG_ID - 1].voiceWaitPeriod)
     {
         intEggStatus = VOICE_START;
         // TODO: play sound
         mp3_play(EGG_ID);
     }
     else if (raiseOrDown == 0 && (intEggStatus == VOICE_START || intEggStatus == VOICE_END) 
-            && (currTime - prevDetectTime > EGG_RAISE_PERIOD))
+            && (currTime - prevDetectTime > conf[EGG_ID - 1].eggRaisePeriod))
     {
         intEggStatus = CLOSE_START;    
 	extEggStatus &= ~STATUS;
