@@ -4,9 +4,10 @@ extern "C" {
   #include <inttypes.h>
   #include <avr/interrupt.h>
 //  #include "WConstants.h"
-  #include <Arduino.h>
+  #include <WConstants.h>
 }
-#include <wiring.h>
+//#include <wiring.h>
+#include <Arduino.h>
 #include "ServoTimer2.h"
 static void initISR();
 static void writeChan(uint8_t chan, int pulsewidth);
