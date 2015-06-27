@@ -1,11 +1,11 @@
 #include <DFPlayer_Mini_Mp3.h>
 #include <SoftwareSerial.h>
-#include <Ultrasonic.h>
+//#include <Ultrasonic.h>
 
 #include "Config.h"
 
 /* create ultrasonic instance */
-Ultrasonic ultrasonic(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN);
+//Ultrasonic ultrasonic(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN);
 SoftwareSerial cumSerial(CUM_RX, CUM_TX);
 
 static unsigned long currTime = 0;
@@ -16,7 +16,7 @@ static unsigned long closeEndTime = 0;
 unsigned long autoRaiseTime = conf[EGG_ID - 1].idleInterval;
 int intEggStatus = CLOSE_END;
 int extEggStatus = 0;
-float cmMesc = 0;
+int cmMesc = 0;
 long microSec = 0;
 
 void setup()
@@ -51,18 +51,19 @@ void loop()
         if (((extEggStatus & MODE) != 0) || intEggStatus == CLOSE_END)
         {
             // read from ultra sonic
-            microSec = ultrasonic.timing();
-            cmMesc = ultrasonic.convert(microSec, Ultrasonic::CM);
+            cmMesc = analogRead(LIGHT_SENSOR_PIN);
+//            microSec = ultrasonic.timing();
+//            cmMesc = ultrasonic.convert(microSec, Ultrasonic::CM);
             Serial.print("cmMesc: ");
             Serial.println(cmMesc);
-            Serial.print("closeEndTime: ");
-            Serial.println(closeEndTime);
-            Serial.print("currTime: ");
-            Serial.println(currTime);
-            Serial.print("extEggStatus: ");
-            Serial.println(extEggStatus);
-            Serial.print("autoRaiseTime: ");
-            Serial.println(autoRaiseTime);
+//            Serial.print("closeEndTime: ");
+//            Serial.println(closeEndTime);
+//            Serial.print("currTime: ");
+//            Serial.println(currTime);
+//            Serial.print("extEggStatus: ");
+//            Serial.println(extEggStatus);
+//            Serial.print("autoRaiseTime: ");
+//            Serial.println(autoRaiseTime);
             if (cmMesc < conf[EGG_ID - 1].closeDist || 
                     (((extEggStatus & MODE) != 0) && (closeEndTime >= openEndTime) && (currTime - closeEndTime > autoRaiseTime)))
             {

@@ -11,6 +11,7 @@
 #define ULTRASONIC_ECHO_PIN     6
 #define CUM_RX                  8
 #define CUM_TX                  9
+#define LIGHT_SENSOR_PIN        A0
 
 /* Constant define (ID indep.) */
 #define FPS 25
